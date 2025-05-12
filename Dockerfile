@@ -42,13 +42,12 @@ RUN playwright install chromium --with-deps
 # Copy the rest of the application code into the container
 COPY . .
 
+# Make entrypoint script executable
+RUN chmod +x /app/entrypoint.sh
+
 # Expose the port the app runs on (FastAPI default is 8000, Render will set $PORT)
 # EXPOSE 8000 # Render will override this with the PORT env var for the web service
 
-# The command to run the FastAPI application will be set in render.yaml or directly in Render service settings.
-# Example: uvicorn main:app --host 0.0.0.0 --port $PORT
-# The command for the Celery worker will also be set in render.yaml.
-# Example: celery -A tasks.celery_app worker -l info
-
-CMD ["echo", "Default command: Please specify service start command in Render.yaml or service settings."]
+# Set the entrypoint script
+ENTRYPOINT ["/app/entrypoint.sh"]
 

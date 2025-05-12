@@ -1,22 +1,17 @@
 # render.yaml for FlowVault Backend
-
 # This configuration assumes you are deploying from a Git repository
 # containing your FastAPI backend code and the Dockerfile created earlier.
-
 services:
   # FastAPI Web Service
   - type: web
     name: flowvault-backend-api
     env: docker # Specifies that we are using a Dockerfile
     dockerfilePath: ./Dockerfile # Path to your Dockerfile
-    # Docker context can be set if Dockerfile is not in the root, but here it is.
-    # dockerContext: .
     plan: free # Or your desired plan (e.g., starter)
-    # Health Check Path (optional, but recommended for FastAPI)
     healthCheckPath: /api/v1/health # Assuming you have a health check endpoint
     envVars:
       - key: PYTHON_VERSION
-        value: "3.11" # Match Python version in Dockerfile
+        value: "3.11"
       - key: DATABASE_URL
         value: "YOUR_SUPABASE_POSTGRESQL_CONNECTION_URI" # Placeholder - User must provide
       - key: CLERK_SECRET_KEY
@@ -36,14 +31,9 @@ services:
         value: "YOUR_S3_SECRET_ACCESS_KEY" # Placeholder
       - key: S3_REGION
         value: "your-s3-bucket-region" # Placeholder
-      # Add other necessary environment variables here
-    # Set the start command for the web service (FastAPI)
-    # Render injects a PORT environment variable that your app should listen on.
-    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
-    # Auto-deploy on push to the connected Git branch (e.g., main)
-    autoDeploy: true # Or false if you prefer manual deploys
-    # Optional: Define build command if not fully handled by Dockerfile (usually not needed with Docker)
-    # buildCommand: "echo Building..."
+      - key: RENDER_SERVICE_TYPE # Added for entrypoint.sh
+        value: "api"
+    autoDeploy: true
 
   # Celery Worker Service
   - type: worker
@@ -73,9 +63,8 @@ services:
         value: "YOUR_S3_SECRET_ACCESS_KEY"
       - key: S3_REGION
         value: "your-s3-bucket-region"
-      # Add other necessary environment variables, same as web service
-    # Set the start command for the Celery worker
-    startCommand: "celery -A tasks.celery_app worker -l info"
+      - key: RENDER_SERVICE_TYPE # Added for entrypoint.sh
+        value: "worker"
     autoDeploy: true
 
   # Redis Service (for Celery broker and results backend)
